@@ -17,6 +17,11 @@ async function bootstrap() {
   );
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
+  app.enableCors({
+    origin: 'http://localhost:4000', //frontend  run korbe ei port e. 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

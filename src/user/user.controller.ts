@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { LoginDto } from 'src/DTOs/Login.dto';
 import { CreateOrderDto } from 'src/DTOs/Order.dto';
 import { UserGuard } from 'src/auth/userGuard';
+import { MenuItem } from '@prisma/client';
 
 @Controller('user')
 export class UserController {
@@ -32,4 +33,15 @@ export class UserController {
     const userId = req.user.sub;
     return this.userService.getUserOrders(userId);
   }
+
+  //  @Get('menu')
+  // getMenuItems(
+  //   @Query('category') category?: string,
+  // ): Promise<any[]> {
+  //   return this.userService.getMenuItems(category);
+  // }
+  @Get('menu')
+getMenuItems(@Query('category') category?: string): Promise<MenuItem[]> {
+  return this.userService.getMenuItems(category);
+}
 }
