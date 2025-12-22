@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { LoginDto } from 'src/DTOs/Login.dto';
+import { CreateOrderDto } from 'src/DTOs/Order.dto';
+import { UserGuard } from 'src/auth/userGuard';
 
 @Controller('user')
 export class UserController {
@@ -15,5 +17,19 @@ export class UserController {
       @Post("login")
       getlogin(@Body() logindata: LoginDto) {
       return this.userService.login(logindata.email, logindata.password);
-}
+      }
+
+  @Post('placeorder')
+  @UseGuards(UserGuard)
+  placeOrder(@Body() data: CreateOrderDto, @Req() req) {
+    const userId = req.user.sub; // JWT থেকে current user id
+    return this.userService.createOrder(userId, data);
+  }
+
+   @Get('orders')
+  @UseGuards(UserGuard)
+  getUserOrders(@Req() req): Promise<any[]> {
+    const userId = req.user.sub;
+    return this.userService.getUserOrders(userId);
+  }
 }

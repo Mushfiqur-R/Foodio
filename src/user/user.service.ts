@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt';
+import { CreateOrderDto } from 'src/DTOs/Order.dto';
 @Injectable()
 export class UserService {
    constructor(private prisma: PrismaService,private jwtService:JwtService){}
@@ -85,4 +86,55 @@ export class UserService {
       },
     };
     }
+   
+     
+     async createOrder(userId: number, data: CreateOrderDto) {
+    // menuItem check
+    const menuItem = await this.prisma.menuItem.findUnique({
+      where: { id: data.menuItemId },
+    });
+
+    if (!menuItem) throw new NotFoundException('Menu item not found');
+    if (!menuItem.isAvailable) throw new BadRequestException('Item is not available');
+
+    const totalPrice = menuItem.price.mul(data.quantity);
+
+    // create order + orderItem
+    const order = await this.prisma.order.create({
+      data: {
+        userId,
+        totalPrice,
+        status: 'PENDING',
+        orderItems: {
+          create: {
+            menuItemId: data.menuItemId,
+            quantity: data.quantity,
+            price: menuItem.price,
+          },
+        },
+      },
+      include: {
+        orderItems: { include: { menuItem: true } },
+        user: true,
+      },
+    });
+
+    return {
+      message: `${menuItem.name} is successfully ordered`,
+      order,
+    };
+  }
+
+  // User dashboard
+  async getUserOrders(userId: number) {
+    return this.prisma.order.findMany({
+      where: { userId },
+      include: {
+        orderItems: { include: { menuItem: true } },
+        user:true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
 }

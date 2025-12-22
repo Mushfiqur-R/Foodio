@@ -10,6 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateMenuItemDto, UpdateMenuItemDto } from 'src/DTOs/MenuItem.dto';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
+import { UpdateOrderStatusDto } from 'src/DTOs/Order.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -98,6 +99,27 @@ deleteCategory(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.updateMenuItem(id, data, image);
   }
   
+   
+  @Get('orders')
+  @UseGuards(AdminGuard)
+  getOrders() {
+    return this.adminService.getOrders();
+  }
+
   
+  @Get('order/:id')
+  @UseGuards(AdminGuard)
+  getOrderDetails(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    return this.adminService.getOrderDetails(id);
+  }
+
+  @Patch('order/status/:id')
+  @UseGuards(AdminGuard)
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateOrderStatusDto,
+  ): Promise<any> {
+    return this.adminService.updateOrderStatus(id, data.status);
+  }
    
 }
