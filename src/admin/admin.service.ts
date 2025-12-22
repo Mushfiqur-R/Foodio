@@ -1,10 +1,14 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Category, Role } from '@prisma/client';
 import { CreateRoleDto } from 'src/DTOs/Role.dto';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
+import { CreateCategoryDto } from 'src/DTOs/Catagory.dto';
+import { CreateMenuItemDto, UpdateMenuItemDto } from 'src/DTOs/MenuItem.dto';
+import { join } from 'path';
+import { existsSync, unlinkSync } from 'fs';
 @Injectable()
 export class AdminService {
      constructor(private prisma: PrismaService, private jwtService:JwtService){}
@@ -103,6 +107,145 @@ async login(email:string,password:string){
       },
     };
     }
+async createCategory(data: CreateCategoryDto):Promise<{message: string; data: Category}> {
+    const existing = await this.prisma.category.findUnique({
+      where: { name: data.name },
+    });
 
+    if (existing) {
+      throw new ConflictException('Category already exists');
+    }
+
+    const category = await this.prisma.category.create({
+      data: { name: data.name },
+    });
+
+    return {
+      message: 'Category created successfully!',
+      data: category,
+    };
+  }
+ async getAllCategory() {
+  return this.prisma.category.findMany();
+}
+
+async deleteCategory(id: number) {
+  const category = await this.prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!category) {
+    throw new NotFoundException('Category not found');
+  }
+
+  await this.prisma.category.delete({
+    where: { id },
+  });
+
+  return {
+    message: 'Category deleted successfully',
+  };
+}
+
+ async createMenuItem(data: CreateMenuItemDto, image?: Express.Multer.File) {
+    // find category by name
+    const category = await this.prisma.category.findUnique({
+      where: { name: data.categoryName },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const imageUrl = image ? `/uploads/menu/${image.filename}` : null;
+
+    const menuItem = await this.prisma.menuItem.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        categoryId: category.id,
+        imageUrl,
+      },
+      include: { category: true },
+    });
+
+    return {
+      message: 'Menu item created successfully!',
+      data: menuItem,
+    };
+  }
+  
+  async deleteMenuItem(id: number): Promise<{ message: string }> {
+    const menuItem = await this.prisma.menuItem.findUnique({ where: { id } });
+
+    if (!menuItem) {
+      throw new NotFoundException('Menu item not found');
+    }
+
+    if (menuItem.imageUrl) {
+      const filePath = join(process.cwd(), menuItem.imageUrl);
+      if (existsSync(filePath)) {
+        unlinkSync(filePath);
+      }
+    }
+
+    await this.prisma.menuItem.delete({ where: { id } });
+
+    return { message: 'Menu item deleted successfully!' };
+  }
+ 
+   async updateMenuItem(
+    id: number,
+    data: UpdateMenuItemDto,
+    image?: Express.Multer.File,
+  ): Promise<{ message: string; data: any }> {
+    const menuItem = await this.prisma.menuItem.findUnique({ where: { id } });
+
+    if (!menuItem) {
+      throw new NotFoundException('Menu item not found');
+    }
+
+    // category update
+    let categoryId = menuItem.categoryId;
+    if (data.categoryName) {
+      const category = await this.prisma.category.findUnique({ where: { name: data.categoryName } });
+      if (!category) throw new NotFoundException('Category not found');
+      categoryId = category.id;
+    }
+
+    // image update
+    let imageUrl = menuItem.imageUrl;
+    if (image) {
+      if (menuItem.imageUrl) {
+        const filePath = join(process.cwd(), menuItem.imageUrl);
+        if (existsSync(filePath)) unlinkSync(filePath);
+      }
+      imageUrl = `/uploads/menu/${image.filename}`;
+    }
+     let isAvailable = menuItem.isAvailable; // default current value
+    if (data.isAvailable !== undefined) {
+  // form-data theke string "true"/"false" ke boolean e convert
+  isAvailable = data.isAvailable === 'true';
+}
+
+    const updated = await this.prisma.menuItem.update({
+      where: { id },
+      data: {
+     name: data.name,
+    description: data.description,
+    price: data.price,
+    categoryId,
+    imageUrl,
+    isAvailable: data.isAvailable !== undefined ? data.isAvailable === 'true' : menuItem.isAvailable
+      },
+      include: { category: true },
+    });
+
+    return {
+      message: 'Menu item updated successfully!',
+      data: updated,
+    };
+  }
 
 }
