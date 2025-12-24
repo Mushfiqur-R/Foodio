@@ -18,6 +18,7 @@ export class CreateMenuItemDto {
   @IsString()
   @IsNotEmpty()
   categoryName: string; // Frontend will send category name
+
 }
 
 

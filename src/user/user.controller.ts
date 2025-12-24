@@ -34,14 +34,9 @@ export class UserController {
     return this.userService.getUserOrders(userId);
   }
 
-  //  @Get('menu')
-  // getMenuItems(
-  //   @Query('category') category?: string,
-  // ): Promise<any[]> {
-  //   return this.userService.getMenuItems(category);
-  // }
   @Get('menu')
-getMenuItems(@Query('category') category?: string): Promise<MenuItem[]> {
+  getMenuItems(@Query('category') category?: string): Promise<MenuItem[]> {
   return this.userService.getMenuItems(category);
-}
+  }
+
 }

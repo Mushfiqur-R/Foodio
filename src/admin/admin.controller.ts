@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateRoleDto } from 'src/DTOs/Role.dto';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { LoginDto } from 'src/DTOs/Login.dto';
 import { AdminGuard } from 'src/auth/adminguard';
 import { CreateCategoryDto } from 'src/DTOs/Catagory.dto';
-import { Category } from '@prisma/client';
+import { Category, MenuItem } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateMenuItemDto, UpdateMenuItemDto } from 'src/DTOs/MenuItem.dto';
 import { diskStorage } from 'multer';
@@ -99,6 +99,10 @@ deleteCategory(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.updateMenuItem(id, data, image);
   }
   
+    @Get('menu')
+    getMenuItems(@Query('category') category?: string): Promise<MenuItem[]> {
+    return this.adminService.getMenuItems(category);
+    }
    
   @Get('orders')
   @UseGuards(AdminGuard)

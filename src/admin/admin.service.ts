@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { Category, OrderStatus, Role } from '@prisma/client';
+import { Category, MenuItem, OrderStatus, Role } from '@prisma/client';
 import { CreateRoleDto } from 'src/DTOs/Role.dto';
 import { CreateUserDto } from 'src/DTOs/User.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -176,6 +176,8 @@ async deleteCategory(id: number) {
     };
   }
   
+
+
   async deleteMenuItem(id: number): Promise<{ message: string }> {
     const menuItem = await this.prisma.menuItem.findUnique({ where: { id } });
 
@@ -278,4 +280,19 @@ async deleteCategory(id: number) {
     if (!order) throw new NotFoundException('Order not found');
     return { message: 'Status updated successfully', order };
   }
+   async getMenuItems(category?: string): Promise<MenuItem[]> {
+     const whereClause: any = {};
+   
+     if (category) {
+       whereClause.category = { name: { equals: category, mode: 'insensitive' } };
+     }
+   
+     return this.prisma.menuItem.findMany({
+       where: whereClause,
+       include: { category: true },
+       orderBy: { createdAt: 'desc' },
+     });
+   }
+   
+
 }

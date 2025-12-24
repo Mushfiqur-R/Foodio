@@ -138,27 +138,6 @@ export class UserService {
     });
   }
 
-  //  async getMenuItems(category?: string): Promise<any[]> {
-  //   return this.prisma.menuItem.findMany({
-  //     where: {
-  //       isAvailable: true,
-  //       ...(category && {
-  //         category: {
-  //           name: {
-  //             equals: category,
-  //             mode: 'insensitive', // Starter == starter
-  //           },
-  //         },
-  //       }),
-  //     },
-  //     include: {
-  //       category: true,
-  //     },
-  //     orderBy: {
-  //       createdAt: 'desc',
-  //     },
-  //   });
-  // }
 
   async getMenuItems(category?: string): Promise<MenuItem[]> {
   const whereClause: any = { isAvailable: true };
