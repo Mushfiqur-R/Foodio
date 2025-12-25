@@ -57,6 +57,102 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+🍽️ Foodio Backend - Restaurant Management API
+A robust backend API for restaurant management system built with NestJS, Prisma ORM, and PostgreSQL.
+📦 Technology Stack
+
+NestJS - Progressive Node.js framework
+TypeScript - Type-safe JavaScript
+Prisma ORM (v6) - Next-generation ORM
+PostgreSQL - Relational database
+JWT - Authentication & Authorization
+
+2. Install dependencies
+bashnpm install
+3. Setup environment variables
+Create a .env file in the root directory:
+envDATABASE_URL="postgresql://username:password@localhost:5432/foodio_db"
+JWT_SECRET="your-secret-key-here"
+
+4. Run Prisma migrations
+bashnpx prisma migrate dev --name init
+5. Generate Prisma Client
+bashnpx prisma generate
+6. (Optional) Seed the database
+bashnpm run seed
+7. Start the development server
+bashnpm run start:dev
+Server runs on http://localhost:3000
+🚀 Running the Application
+Development mode
+bashnpm run start:dev
+Production mode
+bashnpm run build
+npm run start:prod
+Watch mode
+bashnpm run start:debug
+```
+
+## 📁 Project Structure
+```
+foodio_backend/
+├── node_modules/              # Dependencies
+├── prisma/                    # Prisma configuration
+│   ├── migrations/           # Database migrations
+│   └── schema.prisma         # Database schema
+├── src/                       # Source code
+│   ├── admin/                # Admin module
+│   │   ├── admin.controller.ts
+│   │   ├── admin.service.ts
+│   │   └── admin.module.ts
+│   ├── auth/                 # Authentication module
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.module.ts
+│   │   ├── guards/          # Auth guards (JWT, Roles)
+│   │   ├── strategies/      # Passport strategies
+│   │   └── decorators/      # Custom decorators
+│   ├── DTOs/                 # Data Transfer Objects
+│   │   ├── auth.dto.ts
+│   │   ├── category.dto.ts
+│   │   ├── menu-item.dto.ts
+│   │   └── order.dto.ts
+│   ├── prisma/               # Prisma service
+│   │   ├── prisma.service.ts
+│   │   └── prisma.module.ts
+│   ├── user/                 # User module
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   └── user.module.ts
+│   ├── app.controller.spec.ts
+│   ├── app.controller.ts     # Main app controller
+│   ├── app.module.ts         # Root module
+│   ├── app.service.ts        # Main app service
+│   └── main.ts               # Application entry point
+├── test/                      # Test files
+│   ├── app.e2e-spec.ts       # E2E tests
+│   └── jest-e2e.json         # Jest E2E config
+├── uploads/                   # File uploads directory
+│   └── menu/                 # Menu item images
+├── .env                       # Environment variables
+├── .gitignore                 # Git ignore rules
+├── .prettierrc                # Prettier configuration
+├── eslint.config.mjs          # ESLint configuration
+├── nest-cli.json              # Nest CLI configuration
+├── package.json               # Project dependencies
+├── package-lock.json          # Locked dependencies
+├── prisma.config.ts           # Prisma configuration (TypeScript)
+├── README.md                  # Project documentation
+└── tsconfig.json              # TypeScript configuration
+
+🔐 Authentication & Authorization
+JWT-based Authentication
+
+Users login with email and password
+JWT token issued upon successful authentication
+Token must be included in Authorization: Bearer <token> header
+
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
